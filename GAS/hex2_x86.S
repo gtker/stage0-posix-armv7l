@@ -472,7 +472,7 @@ consume_token:
 	b consume_token             @ loop until done
 
 consume_token_done:
-	mov r2, #0                  @ Padd with nulls
+	mov r2, #0                  @ Pad with nulls
 	str r2, [r1]
 	add r1, #4
 	bx r14

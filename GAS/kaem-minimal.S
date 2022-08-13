@@ -264,7 +264,7 @@ collect_string:
 	bl fgetc                        @ C = fgetc(input)
 	pop {r14}
 	cmp r0, #-4                     @ if C == EOF
-	beq Exit_Failure                @ Something went horriably wrong
+	beq Exit_Failure                @ Something went horribly wrong
 
 	cmp r0, #34                     @ IF C == '\"'
 	beq collect_string_done         @ be done
