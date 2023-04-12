@@ -1167,7 +1167,7 @@ statement_label:
 
 statement_local:
 	mov r0, r1                          @ put global_token->S in the right place
-	ldr r1, prim_types_address          @ pointer to primative types
+	ldr r1, prim_types_address          @ pointer to primitive types
 	push {r14}
 	bl lookup_type                      @ See if found
 	pop {r14}
