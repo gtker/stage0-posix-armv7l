@@ -337,7 +337,7 @@ get_token_comment_line:
 
 	## Deal with // line comment
 	push {r14}
-	bl fgetc                            @ drop to match
+	bl purge_macro                      @ discard all until newline
 	pop {r14}
 	ldr r8, C_address
 	str r0, [r8]                        @ Set C
@@ -789,7 +789,7 @@ new_type:
 	bl match                            @ IF GLOBAL_TOKEN->S == "enum"
 	pop {r14}
 	cmp r0, #0                          @ If true
-	bne constant_value                  @ Looks like not an enum
+	bne program_else                    @ Looks like not an enum
 
 	## Deal with minimal anonymous enums
 	ldr r0, [r12]                       @ Using global_token
@@ -868,42 +868,6 @@ enum_end:
 	bl require_match                    @ Make sure it has the required
 	pop {r14}
 
-	b new_type                          @ go around again
-
-constant_value:
-	ldr r0, [r12]                       @ Using global_token
-	cmp r0, #0                          @ Check if NULL
-	beq program_done                    @ Be done if null
-
-	ldr r1, [r0, #8]                    @ GLOBAL_TOKEN->S
-	adr r0, constant                    @ "CONSTANT"
-	push {r14}
-	bl match                            @ IF GLOBAL_TOKEN->S == "CONSTANT"
-	pop {r14}
-	cmp r0, #0                          @ If true
-	bne program_else                    @ Looks like not a constant
-
-	## Deal with minimal constant case
-	ldr r0, [r12]                       @ Using global_token
-	ldr r0, [r0]                        @ global_token->next
-	str r0, [r12]                       @ global_token = global_token->next
-
-	ldr r0, [r0, #8]                    @ global_token->S
-	mov r1, #0                          @ NULL
-	ldr r8, global_constant_list_address
-	ldr r2, [r8]                        @ global_constant_list
-	push {r14}
-	bl sym_declare                      @ Declare that constant
-	pop {r14}
-	ldr r8, global_constant_list_address
-	str r0, [r8]                        @ global_constant_list = sym_declare(global_token->s, NULL, global_constant_list);
-
-	ldr r1, [r12]                       @ Using global_token
-	ldr r1, [r1]                        @ global_token->next
-	str r1, [r0, #16]                   @ global_constant_list->arguments = global_token->next
-
-	ldr r1, [r1]                        @ global_token->next->next
-	str r1, [r12]                       @ global_token = global_token->next->next;
 	b new_type                          @ go around again
 
 program_else:
@@ -1001,8 +965,6 @@ semicolon_0: .asciz ";"
 open_paren_0: .asciz "("
 .balign 4
 enum: .asciz "enum"
-.balign 4
-constant: .asciz "CONSTANT"
 .balign 4
 globals_list_address: .word globals_list
 global_constant_list_address: .word global_constant_list
